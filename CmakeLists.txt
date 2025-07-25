@@ -1,0 +1,86 @@
+cmake_minimum_required(VERSION 3.0.0)
+project(Crux)
+
+#------------------------------------------------------------------------------#
+# Detect 64-bit vs 32-bit
+#------------------------------------------------------------------------------#
+set(OsBits 32)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(OsBits 64)
+endif()
+
+#------------------------------------------------------------------------------#
+# Configure Output Directories
+#------------------------------------------------------------------------------#
+set(fullOutputDir
+  "${CMAKE_SOURCE_DIR}/build/bin/${CMAKE_SYSTEM_NAME}-${OsBits}/${CMAKE_BUILD_TYPE}"
+)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${fullOutputDir}/Libraries")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${fullOutputDir}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${fullOutputDir}")
+
+#------------------------------------------------------------------------------#
+# External Dependencies via FetchContent
+#------------------------------------------------------------------------------#
+include(FetchContent)
+
+# GLM (Header-only math library)
+FetchContent_Declare(
+  glm
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+  GIT_TAG        0.9.9.8
+)
+FetchContent_MakeAvailable(glm)
+
+# GLFW (Windowing and input)
+FetchContent_Declare(
+  glfw
+  GIT_REPOSITORY https://github.com/glfw/glfw.git
+  GIT_TAG        3.3.8
+)
+FetchContent_MakeAvailable(glfw)
+
+# Vulkan (SDK must be installed separately)
+find_package(Vulkan REQUIRED)
+
+#------------------------------------------------------------------------------#
+# Project sources and executable
+#------------------------------------------------------------------------------#
+file(GLOB_RECURSE SRC_FILES
+  "${CMAKE_SOURCE_DIR}/Crux/*.cpp"
+  "${CMAKE_SOURCE_DIR}/Crux/*.h"
+)
+add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+#------------------------------------------------------------------------------#
+# Include directories
+#------------------------------------------------------------------------------#
+target_include_directories(${PROJECT_NAME} PRIVATE
+  ${Vulkan_INCLUDE_DIRS}
+  $<TARGET_PROPERTY:glm,INTERFACE_INCLUDE_DIRECTORIES>
+)
+
+#------------------------------------------------------------------------------#
+# Link libraries
+#------------------------------------------------------------------------------#
+target_link_libraries(${PROJECT_NAME} PRIVATE
+  Vulkan::Vulkan
+  glm::glm
+  glfw
+)
+
+#------------------------------------------------------------------------------#
+# Post-build: copy shaders (.spv) and DLLs
+#------------------------------------------------------------------------------#
+file(GLOB SHADERS    "${CMAKE_SOURCE_DIR}/Crux/*.spv")
+file(GLOB DLL_FILES  "${CMAKE_SOURCE_DIR}/Crux/*.dll")
+
+foreach(ASSET IN LISTS SHADERS DLL_FILES)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      ${ASSET}
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  )
+endforeach()
+
+# End of CMakeLists.txt

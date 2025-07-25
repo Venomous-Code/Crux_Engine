@@ -1,0 +1,30 @@
+# Build and IDE
+/build/
+/bin/
+CMakeFiles/
+CMakeCache.txt
+*.sln
+*.vcxproj*
+.vs/
+
+# Binaries
+*.exe
+*.dll
+*.lib
+*.obj
+*.pdb
+
+# Temporary and OS files
+*.ipch
+*.pch
+*.DS_Store
+Thumbs.db
+
+# Editor folders
+.vscode/
+.idea/
+
+x64/
+*.sln
+CruxDeps/
+Crux/Debug/
