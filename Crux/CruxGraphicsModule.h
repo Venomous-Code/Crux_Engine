@@ -44,6 +44,9 @@ private:
     QueueFamilyIndices CruxFindQueueFamilies(VkPhysicalDevice device);
     std::vector<const char*> CruxGetRequiredExtensions();
     bool CruxCheckValidationLayerSupport();
+    void CruxCreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer,
+        VkDeviceMemory& bufferMemory);
+    void CruxCopyBuffer(VkBuffer SrcBuffer, VkBuffer DstBuffer, VkDeviceSize size);
 
     //DATA MEMBERS:
     GLFWwindow* window;
