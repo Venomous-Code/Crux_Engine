@@ -47,6 +47,10 @@ private:
     void CruxCreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer,
         VkDeviceMemory& bufferMemory);
     void CruxCopyBuffer(VkBuffer SrcBuffer, VkBuffer DstBuffer, VkDeviceSize size);
+    void CruxCreateIndexBuffer();
+    void CruxCreateDescriptorSetLayout();
+    void CruxCreateUniformBuffer();
+    void CruxUpdateUniformBuffer(uint32_t currentImage);
 
     //DATA MEMBERS:
     GLFWwindow* window;
@@ -71,6 +75,7 @@ private:
     std::vector<VkFramebuffer> swapChainFramebuffers;
 
     VkRenderPass renderPass;
+    VkDescriptorSetLayout descriptorSetLayout;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
 
@@ -78,6 +83,11 @@ private:
 
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
+    VkBuffer indexBuffer;
+    VkDeviceMemory indexBufferMemory;
+    std::vector<VkBuffer> uniformBuffer;
+    std::vector<VkDeviceMemory> uniformBufferMemory;
+    std::vector<void*> uniformBuffersMappped;
 
     std::vector<VkCommandBuffer> commandBuffers;
 
