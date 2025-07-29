@@ -51,6 +51,8 @@ private:
     void CruxCreateDescriptorSetLayout();
     void CruxCreateUniformBuffer();
     void CruxUpdateUniformBuffer(uint32_t currentImage);
+    void CruxCreateDescriptorPool();
+    void CruxCreateDescriptorSets();
 
     //DATA MEMBERS:
     GLFWwindow* window;
@@ -76,6 +78,7 @@ private:
 
     VkRenderPass renderPass;
     VkDescriptorSetLayout descriptorSetLayout;
+    VkDescriptorPool descriptorPool;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
 
@@ -88,6 +91,7 @@ private:
     std::vector<VkBuffer> uniformBuffer;
     std::vector<VkDeviceMemory> uniformBufferMemory;
     std::vector<void*> uniformBuffersMappped;
+    std::vector<VkDescriptorSet> descriptorSets;
 
     std::vector<VkCommandBuffer> commandBuffers;
 

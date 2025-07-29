@@ -65,6 +65,8 @@ void CruxGraphicsModule::CruxInitVulkan() {
     CruxCreateVertexBuffer();
     CruxCreateIndexBuffer();
     CruxCreateUniformBuffer();
+    CruxCreateDescriptorPool();
+    CruxCreateDescriptorSets();
     CruxCreateCommandBuffers();
     CruxCreateSyncObjects();
 }
@@ -97,6 +99,8 @@ void CruxGraphicsModule::CruxCleanupSwapChain() {
             vkDestroyBuffer(device, uniformBuffer[i], nullptr);
             vkFreeMemory(device, uniformBufferMemory[i], nullptr);
         }
+
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 
         vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 
@@ -432,8 +436,8 @@ void CruxGraphicsModule::CruxCleanupSwapChain() {
     }
 
     void CruxGraphicsModule::CruxCreateGraphicsPipeline() {
-        auto vertShaderCode = CruxReadFile("vert.spv");
-        auto fragShaderCode = CruxReadFile("frag.spv");
+        auto vertShaderCode = CruxReadFile("uboVert.spv");
+        auto fragShaderCode = CruxReadFile("uboFrag.spv");
 
         VkShaderModule vertShaderModule = CruxCreateShaderModule(vertShaderCode);
         VkShaderModule fragShaderModule = CruxCreateShaderModule(fragShaderCode);
@@ -480,7 +484,7 @@ void CruxGraphicsModule::CruxCleanupSwapChain() {
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth = 1.0f;
         rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
@@ -728,6 +732,8 @@ void CruxGraphicsModule::CruxCleanupSwapChain() {
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
         vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
 
         vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
@@ -1165,4 +1171,58 @@ void CruxGraphicsModule::CruxUpdateUniformBuffer(uint32_t currentImage) {
     UBO.proj[1][1] *= -1;
 
     memcpy(uniformBuffersMappped[currentImage], &UBO, sizeof(UBO));
+}
+
+void CruxGraphicsModule::CruxCreateDescriptorPool() {
+    VkDescriptorPoolSize poolSize{};
+    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    VkDescriptorPoolCreateInfo poolCreateInfo{};
+    poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolCreateInfo.poolSizeCount = 1;
+    poolCreateInfo.pPoolSizes = &poolSize;
+    poolCreateInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    if (vkCreateDescriptorPool(device, &poolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+        throw std::runtime_error("[ERROR]:- CRUX FAILED TO CREATE A DESCRIPTOR POOL.");
+    }
+    else {
+        std::cout << "[INFO]:- CRUX SUCCESSFULLY CREATED A DESCRIPTOR POOL." << std::endl;
+    }
+}
+
+void CruxGraphicsModule::CruxCreateDescriptorSets() {
+    std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocateInfo{};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = descriptorPool;
+    allocateInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    allocateInfo.pSetLayouts = layouts.data();
+
+    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+    if (vkAllocateDescriptorSets(device, &allocateInfo, descriptorSets.data()) != VK_SUCCESS) {
+        throw std::runtime_error("[ERROR]:- CRUX FAILED TO ALLOCATE DESCRIPTOR SETS.");
+    }
+    else {
+        std::cout << "[INFO]:- CRUX SUCCESSFULLY ALLOCATED THE DESCRIPTOR SETS." << std::endl;
+    }
+
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = uniformBuffer[i];
+        bufferInfo.offset = 0;
+        bufferInfo.range = sizeof(UniformBufferObject);
+
+        VkWriteDescriptorSet descriptorWrite{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSets[i];
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &bufferInfo;
+
+        vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+    }
 }
