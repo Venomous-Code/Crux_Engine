@@ -53,6 +53,16 @@ private:
     void CruxUpdateUniformBuffer(uint32_t currentImage);
     void CruxCreateDescriptorPool();
     void CruxCreateDescriptorSets();
+    void CruxCreateTextureImage();
+    void CruxCreateImage(uint32_t width, uint32_t height, VkFormat format,
+        VkImageTiling tiling, VkImageUsageFlags usage,
+        VkMemoryPropertyFlags properties, VkImage& image,
+        VkDeviceMemory& imageMemory);
+    VkCommandBuffer CruxBeginSingleTimeCommands();
+    void CruxEndSingleTimeCommands(VkCommandBuffer CommandBuffer);
+    void CruxCopyBuffer();
+    void CruxTransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+    void CruxCopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
     //DATA MEMBERS:
     GLFWwindow* window;
@@ -88,6 +98,9 @@ private:
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
+    VkImage textureImage;
+    VkDeviceMemory textureImageMemory;
+
     std::vector<VkBuffer> uniformBuffer;
     std::vector<VkDeviceMemory> uniformBufferMemory;
     std::vector<void*> uniformBuffersMappped;
