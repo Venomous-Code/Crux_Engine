@@ -63,6 +63,9 @@ private:
     void CruxCopyBuffer();
     void CruxTransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     void CruxCopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+    void CruxCreateTextureImageView();
+    VkImageView CruxCreateImageView(VkImage Image, VkFormat format);
+    void CruxCreateTextureSampler();
 
     //DATA MEMBERS:
     GLFWwindow* window;
@@ -100,6 +103,8 @@ private:
     VkDeviceMemory indexBufferMemory;
     VkImage textureImage;
     VkDeviceMemory textureImageMemory;
+    VkImageView textureImageView;
+    VkSampler textureSampler;
 
     std::vector<VkBuffer> uniformBuffer;
     std::vector<VkDeviceMemory> uniformBufferMemory;
