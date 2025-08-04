@@ -40,6 +40,20 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
+FetchContent_Declare(
+  stb
+  GIT_REPOSITORY	https://github.com/flickhail/stb_image.h.git
+  GIT_TAG 		master
+)
+FetchContent_MakeAvailable(stb)
+
+FetchContent_Declare(
+  tinyobjloader
+  GIT_REPOSITORY	https://github.com/tinyobjloader/tinyobjloader.git
+  GIT_TAG 		release
+)
+FetchContent_MakeAvailable(tinyobjloader)
+
 # Vulkan (SDK must be installed separately)
 find_package(Vulkan REQUIRED)
 
@@ -67,6 +81,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   Vulkan::Vulkan
   glm::glm
   glfw
+  stb
+  tinyobjloader
 )
 
 #------------------------------------------------------------------------------#
