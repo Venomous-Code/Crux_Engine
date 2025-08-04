@@ -64,8 +64,12 @@ private:
     void CruxTransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     void CruxCopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
     void CruxCreateTextureImageView();
-    VkImageView CruxCreateImageView(VkImage Image, VkFormat format);
+    VkImageView CruxCreateImageView(VkImage Image, VkFormat format, VkImageAspectFlags aspectFlags);
     void CruxCreateTextureSampler();
+    void CruxCreateDepthResources();
+    VkFormat CruxFindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+    VkFormat CruxFindDepthFormat();
+    bool CruxHasStencilComponent(VkFormat format);
 
     //DATA MEMBERS:
     GLFWwindow* window;
@@ -105,6 +109,9 @@ private:
     VkDeviceMemory textureImageMemory;
     VkImageView textureImageView;
     VkSampler textureSampler;
+    VkImage depthImage;
+    VkDeviceMemory depthImageMemory;
+    VkImageView depthImageView;
 
     std::vector<VkBuffer> uniformBuffer;
     std::vector<VkDeviceMemory> uniformBufferMemory;
