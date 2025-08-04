@@ -1,6 +1,12 @@
 #pragma once
 #include "QueueFamilyIndices.h"
 
+const uint32_t WIDTH = 800;
+const uint32_t HEIGHT = 600;
+
+const std::string MODEL_PATH = "Models/vikingroom.obj";
+const std::string TEXTURE_PATH = "Textures/vikingroom.png";
+
 class CruxGraphicsModule
 {
 public:
@@ -70,6 +76,7 @@ private:
     VkFormat CruxFindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
     VkFormat CruxFindDepthFormat();
     bool CruxHasStencilComponent(VkFormat format);
+    void CruxLoadModel();
 
     //DATA MEMBERS:
     GLFWwindow* window;
@@ -101,6 +108,8 @@ private:
 
     VkCommandPool commandPool;
 
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
